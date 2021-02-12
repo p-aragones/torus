@@ -1,0 +1,112 @@
+#!/usr/bin/python3
+
+from sys import argv as av
+
+ac = len(av)
+
+def print_h():
+    print("USAGE")
+    print("\t./105torus opt a0 a1 a2 a3 a4 n\n")
+    print("DESCRIPTION")
+    print("\topt\tmethod option:")
+    print("\t\t\t1 for the bisection method")
+    print("\t\t\t2 for the Newton's method")
+    print("\t\t\t3 for the secant method")
+    print("\ta[0-4]\tcoefficient of the equation")
+    print("\tn\tprecision (the application to the polynomial to the solution should be smaller than 10^-n)")
+
+def IsInt(s):
+    for i in range(1, 8, 1):
+        try: 
+            int(s[i])
+        except ValueError:
+            return False
+
+def eq(n):
+    y = int(av[6])*n**4 + int(av[5])*n**3 + int(av[4])*n**2 + int(av[3])*n**1 + int(av[2])
+    return y
+
+def der_eq(n):
+    y = 4*int(av[6])* n**3 + 3*int(av[5])*n**2 + 2*int(av[4])*n**1 + int(av[3])
+    return y
+
+def bisection(a, b, reps, tolerance, av):
+    c = (a + b) / 2
+    fa = 0
+    fc = 0
+
+    if (reps == 0):
+        print("Couldn't find the x within 50 repetitions, exiting...")
+        exit(0)
+    if (eq(a) < 0):
+        fa = -1
+    elif (eq(a) > 0):
+        fa = 1
+    if (eq(c) < 0):
+        fc = -1
+    elif (eq(c) > 0):
+        fc = 1
+
+    if (abs(eq(c)) <= pow(10, -1 * int(av[7]))):
+        print("x =", round(c, int(av[7])))
+    else:
+        print("x =", round(c, int(av[7])))
+        if (fa == fc):
+            bisection(c, b, reps - 1, tolerance, av)
+        else:
+            bisection(a, c, reps - 1, tolerance, av)
+
+def newtons(xn, reps):
+    if reps == 0:
+        print("Couldn't find the x within 50 repetitions, exiting...")
+        exit(0)
+    if (der_eq(xn) == 0):
+        exit(0)
+    if (abs(eq(xn)) <= pow(10, -1 * int(av[7]))):
+        print("x =", round(xn, int(av[7])))
+    else:
+        print("x =", round(xn, int(av[7])))
+        xn = xn - (eq(xn)/der_eq(xn))
+        newtons(xn, reps - 1)
+
+def secant(a, b, reps):
+    def func(a, b):
+        if (eq(a)-eq(b) == 0):
+            exit(0)
+        y = a - ((eq(a)*(a-b))/(eq(a)-eq(b)))
+        return y
+    c = func(a, b)
+    if reps == 0:
+        print("Couldn't find the x within 50 repetitions, exiting...")
+        exit(0)
+    if (abs(eq(c)) <= pow(10, -1 * int(av[7]))):
+        print("x =", round(c, int(av[7])))
+    else:
+        print("x =", round(c, int(av[7])))
+        secant(c, a, reps - 1)
+
+def torus():
+    n = int(av[7])
+    tolerance = 1
+    for i in range(n):
+        tolerance = tolerance * 10
+    tolerance = 1 / tolerance
+    if av[1] == '1':
+        bisection(0, 1, 50, tolerance, av)
+    elif av[1] == '2':
+        newtons(0.5, 50)
+    elif av[1] == '3':
+        secant(1, 0, 50)
+    else:
+        exit(84)
+
+def main():
+    if ac == 2 and av[1] == "-h":
+        print_h()
+    elif ac != 8 or IsInt(av) is False or int(av[7]) < 0:
+        exit(84)
+    else:
+        torus()
+
+if __name__ == "__main__":
+    main()
